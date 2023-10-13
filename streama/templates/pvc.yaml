@@ -1,0 +1,23 @@
+{{/* Copyright: (c) 2022, Justin Béra (@just1not2) <me@just1not2.org> */}}
+{{/* Apache License 2.0 (see LICENSE or https://www.apache.org/licenses/LICENSE-2.0.txt) */}}
+
+{{- if and .Values.persistence.enabled (not .Values.persistence.existingClaim) }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "streama.fullname" . }}
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "streama.labels" . | nindent 4 }}
+  {{- with .Values.persistence.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  storageClassName: {{ .Values.persistence.storageClassName | quote }}
+  accessModes:
+    - {{ .Values.persistence.accessMode | quote }}
+  resources:
+    requests:
+      storage: {{ .Values.persistence.size | quote }}
+{{- end }}

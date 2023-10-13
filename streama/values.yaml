@@ -1,0 +1,311 @@
+# Copyright: (c) 2022, Justin Béra (@just1not2) <me@just1not2.org>
+# Apache License 2.0 (see LICENSE or https://www.apache.org/licenses/LICENSE-2.0.txt)
+
+
+## To overwrite the streama.fullname variable
+fullnameOverride: ""
+
+## To overwrite the streama.name variable
+nameOverride: ""
+
+
+## Streama container image
+image:
+  ## Streama image registry
+  registry: docker.io
+
+  ## Streama image repository
+  repository: just1not2/streama
+
+  ## Streama image tag (immutable tags are recommended)
+  ## Default is the chart appVersion
+  tag: ""
+
+  ## Streama image pull policy
+  ## ref: https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy
+  pullPolicy: IfNotPresent
+
+## Global Docker registry secret names as an array
+## ref: https://kubernetes.io/docs/concepts/containers/images/#specifying-imagepullsecrets-on-a-pod
+imagePullSecrets: []
+
+
+## Pod security context
+## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+podSecurityContext: {}
+
+## Container security context
+## ref: ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+securityContext: {}
+
+## Streama service account
+## ref: https://kubernetes.io/docs/reference/access-authn-authz/service-accounts-admin/
+serviceAccount:
+  ## Name of the service account
+  name: streama
+
+  ## Boolean that indicates if the service should be created
+  create: true
+
+  ## Annotations of the service account
+  annotations: {}
+
+
+## Node labels for pod assignment
+## ref: https://kubernetes.io/docs/user-guide/node-selection/
+nodeSelector: {}
+
+## Tolerations for pod assignment
+## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+tolerations: {}
+
+## Pod affinity
+## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity
+affinity: {}
+
+
+## Persistence configuration to store media data
+## ref: https://kubernetes.io/docs/concepts/storage/persistent-volumes/
+persistence:
+  ## Boolean that indicates if media data should be stored on a persistent storage
+  ## If set to false, all following persistence values will not be taken into account
+  ## It should only be disabled for debugging purpose with a single Streama pod in the ReplicaSet
+  enabled: true
+
+  ## Existing Persistent Volume Claim to use instead of creating one
+  ## If this value is set, all following persistence values will not be taken into account
+  existingClaim: ""
+
+  ## Storage class of the Persistent Volume
+  ## ref: https://kubernetes.io/docs/concepts/storage/persistent-volumes/#class
+  storageClassName: local
+
+  ## Access mode of the Persistent Volume
+  ## ref: https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes
+  accessMode: ReadWriteOnce
+
+  ## Size of the Persistent Volume
+  size: 10Gi
+
+
+## Ingress resource that allows you to access the Streama application
+## ref: https://kubernetes.io/docs/concepts/services-networking/ingress/
+ingress:
+  ## Boolean that indicates if an Ingress should be created
+  ## If set to false, all following ingress values will not be taken into account
+  enabled: false
+
+  ## Hostname of the Streama Application
+  ## A corresponding DNS record should point to the Ingress load balancing IP
+  host: ""
+
+  ## Class of the Ingress Controller
+  ## ref: https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-class
+  className: nginx
+
+  ## Ingress annotations
+  annotations:
+    ## The proxy body size should be set to allow large media upload
+    ## ref: https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/annotations/#custom-max-body-size
+    nginx.ingress.kubernetes.io/proxy-body-size: 10g
+
+    ## Cookie session affinity should be enabled to support ReplicaSets with multiple Streama pods
+    ## ref: https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/annotations/#session-affinity
+    nginx.ingress.kubernetes.io/affinity: cookie
+
+    ## Cookie name may be should be changed
+    ## ref: https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/annotations/#cookie-affinity
+    nginx.ingress.kubernetes.io/session-cookie-name: streama-session
+
+  ## TLS configuration
+  ## ref: https://kubernetes.io/docs/concepts/services-networking/ingress/#tls
+  tls:
+    ## Boolean that indicates if TLS is enabled
+    ## If set to false, all following ingress.tls values will not be taken into account
+    enabled: false
+
+    ## Name of the TLS secret
+    secretName: ""
+
+
+## Autoscaling configuration
+autoscaling:
+  ## Boolean that indicates if autoscaling is enabled
+  ## If set to false, all following autoscaling values will not be taken into account and the replicaCount value will be taken into account
+  enabled: true
+
+  ## Minimum number of replicas
+  minReplicas: 2
+
+  ## Maximum number of replicas
+  maxReplicas: 5
+
+  ## Target CPU utilization of Streama pods
+  targetCPUUtilizationPercentage: 1000m
+
+  ## Target memory utilization of Streama pods
+  ## It is not recommended to enable this target as the Streama application runs with Java (the RAM metric is not reliable)
+  targetMemoryUtilizationPercentage: ""
+
+  ## Autoscaling behaviors
+  ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/#configurable-scaling-behavior
+  behavior:
+    ## Scale up policy
+    scaleUp:
+      stabilizationWindowSeconds: 120
+      policyType: Pods
+      policyValue: 2
+      policyPeriodSeconds: 30
+
+    ## Scale up policy
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policyType: Percent
+      policyValue: 20
+      policyPeriodSeconds: 60
+
+## Static replica count if autoscaling is disabled
+replicaCount: 1
+
+
+## Probe configuration
+## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
+probes:
+  ## Startup probe
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#define-startup-probes
+  startup:
+    initialDelaySeconds: 0
+    periodSeconds: 2
+    timeoutSeconds: 5
+    successThreshold: 1
+    failureThreshold: 60
+
+  ## Readiness probe
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#define-readiness-probes
+  readiness:
+    initialDelaySeconds: 0
+    periodSeconds: 2
+    timeoutSeconds: 1
+    successThreshold: 1
+    failureThreshold: 2
+
+  ## Liveness probe
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#define-a-liveness-http-request
+  liveness:
+    initialDelaySeconds: 0
+    periodSeconds: 5
+    timeoutSeconds: 1
+    successThreshold: 1
+    failureThreshold: 3
+
+
+## Resource limitations and requests
+## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+resources:
+  ## Maximum resources allocated to pods
+  limits:
+    memory: 1536Mi
+    cpu: 700m
+
+  ## Requested resources allocated to pods
+  requests:
+    memory: 1024Mi
+    cpu: 500m
+
+
+## MySQL configuration
+## The values overwrite the values of the Bitnami MySQL chart
+## ref: https://github.com/bitnami/charts/blob/master/bitnami/mysql/values.yaml
+mysql:
+  ## Boolean that indicates if the MySQL chart should be applied
+  ## If set to false, all following mysql values will not be taken into account and the externalDatabase value will be taken into account
+  enabled: true
+
+  ## MySQL container image
+  image:
+    ## MySQL image registry
+    registry: docker.io
+
+    ## MySQL image repository
+    repository: bitnami/mysql
+
+    ## MySQL image tag (immutable tags are recommended)
+    ## MySQL client in Streama does not support versions higher than 5.7
+    tag: 5.7
+
+    ## MySQL image pull policy
+    pullPolicy: IfNotPresent
+
+  ## MySQL architecture (`standalone` or `replication`)
+  architecture: standalone
+
+  ## MySQL authentication parameters
+  auth:
+    ## Name of the Streama database to create
+    database: streama
+
+    ## Name of the Streama user to create
+    username: streama
+
+    ## Existing secret for password details
+    ## The secret has to contain the keys `mysql-root-password`, `mysql-replication-password` and `mysql-password`
+    ## If this value is set, the mysql.auth.password, mysql.auth.replicationPassword and mysql.auth.rootPassword values will not be taken into account
+    existingSecret: ""
+
+    ## Password of the Streama user to create
+    ## Ignored if the mysql.auth.existingSecret value is provided
+    password: streama
+
+    ## MySQL replication user
+    replicationUser: replicator
+
+    ## MySQL replication user password
+    ## Ignored if the mysql.auth.existingSecret value is provided
+    replicationPassword: ""
+
+    ## Password for the `root` user
+    ## Ignored if the mysql.auth.existingSecret value is provided
+    rootPassword: ""
+
+  ## MySQL Primary configuration
+  primary:
+    persistence:
+      ## Boolean that indicates if MySQL data should be stored on a persistent storage
+      ## If set to false, all following mysql.primary.persistence values will not be taken into account
+      ## It should not be disabled for production
+      enabled: true
+
+      ## Existing Persistent Volume Claim to use instead of creating one
+      ## If this value is set, all following persistence values will not be taken into account
+      existingClaim: ""
+
+      ## Storage class of the Persistent Volume
+      ## ref: https://kubernetes.io/docs/concepts/storage/persistent-volumes/#class
+      storageClass: local
+
+      ## Access modes of the Persistent Volume
+      ## ref: https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes
+      accessModes:
+        - ReadWriteOnce
+
+      ## Size of the Persistent Volume
+      size: 1Gi
+
+## External database configuration
+## Ignored if the mysql.enabled value is not set to false
+externalDatabase:
+  ## Hostname of the MySQL server
+  host: ""
+
+  ## Port of the MySQL server
+  port: 3306
+
+  ## Name of the Streama database
+  database: streama
+
+  ## Name of the Streama user
+  user: streama
+
+  ## Existing secret for password details
+  ## The secret has to contain the key `mysql-password`
+  existingSecret: ""

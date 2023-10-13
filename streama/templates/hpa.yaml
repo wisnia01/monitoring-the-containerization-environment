@@ -1,0 +1,47 @@
+{{/* Copyright: (c) 2022, Justin Béra (@just1not2) <me@just1not2.org> */}}
+{{/* Apache License 2.0 (see LICENSE or https://www.apache.org/licenses/LICENSE-2.0.txt) */}}
+
+{{- if .Values.autoscaling.enabled }}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "streama.fullname" . }}
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "streama.labels" . | nindent 4 }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "streama.fullname" . }}
+  minReplicas: {{ .Values.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.autoscaling.maxReplicas }}
+  metrics:
+    {{- if .Values.autoscaling.targetCPUUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: AverageValue
+          averageValue: {{ .Values.autoscaling.targetCPUUtilizationPercentage }}
+    {{- end }}
+    {{- if .Values.autoscaling.targetMemoryUtilizationPercentage }}
+    - type: Resource
+      target:
+        type: AverageValue
+        averageValue: {{ .Values.autoscaling.targetMemoryUtilizationPercentage }}
+    {{- end }}
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: {{ .Values.autoscaling.behavior.scaleDown.stabilizationWindowSeconds }}
+      policies:
+        - type: {{ .Values.autoscaling.behavior.scaleDown.policyType }}
+          value: {{ .Values.autoscaling.behavior.scaleDown.policyValue }}
+          periodSeconds: {{ .Values.autoscaling.behavior.scaleDown.policyPeriodSeconds }}
+    scaleUp:
+      stabilizationWindowSeconds: {{ .Values.autoscaling.behavior.scaleUp.stabilizationWindowSeconds }}
+      policies:
+        - type: {{ .Values.autoscaling.behavior.scaleUp.policyType }}
+          value: {{ .Values.autoscaling.behavior.scaleUp.policyValue }}
+          periodSeconds: {{ .Values.autoscaling.behavior.scaleUp.policyPeriodSeconds }}
+{{- end }}
