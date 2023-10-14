@@ -1,0 +1,1 @@
+docker run -d -p 1935:1935 -p 8080:8080 -v custom_players:/usr/local/nginx/html/players -v videos://usr/local/nginx/videos alqutami/rtmp-hls
