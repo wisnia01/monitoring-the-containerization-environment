@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    name: streaming-server-deployment
+  name: streaming-server-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: streaming-server-pod
+  template:
+    metadata:
+      labels:
+        name: streaming-server-pod
+    spec:
+      restartPolicy: Always
+      containers:
+        - name: streaming-server-container
+          image: streaming-server
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8080

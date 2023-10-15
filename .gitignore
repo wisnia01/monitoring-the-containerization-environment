@@ -1,1 +1,4 @@
-server/videos/*
+# videos
+tmp/*
+/**/videos/*
+*.mp4
