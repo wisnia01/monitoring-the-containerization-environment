@@ -17,7 +17,7 @@ spec:
       restartPolicy: Always
       containers:
         - name: streaming-server-container
-          image: streaming-server
+          image: streaming-server:0.1.0
           imagePullPolicy: Never
           ports:
             - containerPort: 8080
