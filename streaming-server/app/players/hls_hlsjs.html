@@ -1,0 +1,121 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>HLS streaming</title>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+	<link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css">
+	<script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+	<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+	<script src="https://cdn.plyr.io/3.7.8/plyr.js"></script>
+  </head>
+
+	<body>
+		<div style="height: 100%">
+		   <video id="video" controls></video>
+		 </div>
+
+		<script>
+			if(Hls.isSupported()) {
+				var video = document.getElementById('video');
+				var hls = new Hls();
+				hls.loadSource('../videos/output/test.m3u8');
+				console.log("XD")
+				const defaultOptions = {};
+				hls.on(Hls.Events.MANIFEST_PARSED,function() {
+					const availableQualities = hls.levels.map((lvl) => lvl.height)
+					defaultOptions.controls = 
+					[
+						'play-large', // The large play button in the center
+						'restart', // Restart playback
+						'rewind', // Rewind by the seek time (default 10 seconds)
+						'play', // Play/pause playback
+						'fast-forward', // Fast forward by the seek time (default 10 seconds)
+						'progress', // The progress bar and scrubber for playback and buffering
+						'current-time', // The current time of playback
+						'duration', // The full duration of the media
+						'mute', // Toggle mute
+						'volume', // Volume control
+						'captions', // Toggle captions
+						'settings', // Settings menu
+						'pip', // Picture-in-picture (currently Safari only)
+						'airplay', // Airplay (currently Safari only)
+						'download', // Show a download button with a link to either the current source or a custom URL you specify in your options
+						'fullscreen', // Toggle fullscreen
+					];
+					defaultOptions.quality = {
+						default: availableQualities[0],
+						options: availableQualities,
+						forced: true,
+						onChange: (e) => updateQuality(e)
+					}
+					new Plyr(video, defaultOptions);
+					// video.play();
+				});
+				hls.attachMedia(video);
+				window.hls = hls;
+			}
+			function updateQuality(newQuality) {
+				window.hls.levels.forEach((lvl, lvlIndex) => {
+					if (lvl.height == newQuality) {
+						window.hls.currentLevel = lvlIndex
+					}
+				});
+			}
+		</script>
+	</body>
+</html> -->
+
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title>HLS Sample</title>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+</head>
+<body>
+</div>
+<div class="row">
+    <div class="col-md-6 align__video">
+        <video height="360" width="640" id="video" controls></video>
+    </div>
+    <div class="col-md-6 align__video">
+        <div id='resolution'></div>
+    </div>
+</div>
+<script>
+    
+    let video = document.getElementById('video');
+
+
+    if (Hls.isSupported()) {
+        var hls = new Hls({
+            maxBufferLength: 6,
+			maxMaxBufferLength: 6
+        });
+        hls.loadSource('../videos/output/test.m3u8');
+        hls.attachMedia(video);
+        hls.on(Hls.Events.MANIFEST_PARSED, function () {
+            video.play().then(() => {
+                console.log(video.videoHeight, '<<<<HRIGHT', video.videoWidth, '<<<WIDTH');
+                let resolution = document.getElementById('resolution');
+                resolution.innerText = video.videoHeight + 'x' + video.videoWidth;
+            });
+        });
+    }
+    // hls.js is not supported on platforms that do not have Media Source Extensions (MSE) enabled.
+    // When the browser has built-in HLS support (check using `canPlayType`), we can provide an HLS manifest (i.e. .m3u8 URL) directly to the video element through the `src` property.
+    // This is using the built-in support of the plain video element, without using hls.js.
+    // Note: it would be more normal to wait on the 'canplay' event below however on Safari (where you are most likely to find built-in HLS support) the video.src URL must be on the user-driven
+    // white-list before a 'canplay' event will be emitted; the last video event that can be reliably listened-for when the URL is not on the white-list is 'loadedmetadata'.
+    else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        video.src = '../videos/output/test.m3u8';
+        video.addEventListener('loadedmetadata', function () {
+            video.play();
+        });
+    }
+</script>
+</body>
+</html>
