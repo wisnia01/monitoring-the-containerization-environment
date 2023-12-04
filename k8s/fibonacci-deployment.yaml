@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    name: fibonacci-deployment
+  name: fibonacci-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: fibonacci-pod
+  template:
+    metadata:
+      labels:
+        name: fibonacci-pod
+    spec:
+      restartPolicy: Always
+      containers:
+        - name: fibonacci-container
+          image: fibonacci
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 5000

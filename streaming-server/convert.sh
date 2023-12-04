@@ -28,6 +28,6 @@ mkdir -p $VIDEOS_PATH/hls
 mkdir -p $VIDEOS_PATH/mpeg-dash
 mkdir -p $VIDEOS_PATH/original
 
-ffmpeg -i $INPUT_FILE -codec: copy -start_number 0 -hls_time 10 -hls_list_size 0 -f hls $VIDEOS_PATH/hls/converted-video.m3u8
+ffmpeg -i $INPUT_FILE -codec copy -start_number 0 -hls_time 10 -hls_list_size 0 -f hls $VIDEOS_PATH/hls/converted-video.m3u8
 ffmpeg -i $INPUT_FILE -codec copy -start_number 0 -seg_duration 10 -f dash $VIDEOS_PATH/mpeg-dash/converted-video.mpd
 cp $INPUT_FILE $VIDEOS_PATH/original/original-video.mp4
