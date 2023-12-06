@@ -4,4 +4,4 @@
 
 docker build -t streaming-server .
 docker stop streaming-server-container && docker rm streaming-server-container 2>/dev/null
-docker run -d -p 8080:8080 --name streaming-server-container --network my-bridge streaming-server
+docker run -d --name streaming-server-container --network my-bridge streaming-server
