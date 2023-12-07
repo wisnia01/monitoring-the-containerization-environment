@@ -1,6 +1,7 @@
 #!/bin/bash
 
 INPUT_FILE=""
+OUTPUT_PATH="app/streams"
 
 while getopts i: flag
 do
@@ -20,14 +21,56 @@ elif [[ $INPUT_FILE != *.mp4 ]]; then
   exit 1
 fi
 
-VIDEOS_PATH="app/videos"
+rm -rf $OUTPUT_PATH
+mkdir -p $OUTPUT_PATH/hls
+mkdir -p $OUTPUT_PATH/mpeg-dash
+mkdir -p $OUTPUT_PATH/original
+mkdir -p $OUTPUT_PATH/hls-abr
 
-rm -rf $VIDEOS_PATH
+start=`date +%s`
+# HLS
+ffmpeg -i $INPUT_FILE \
+  -vcodec libx264 \
+  -acodec aac \
+  -start_number 0 \
+  -hls_time 3 \
+  -hls_list_size 0 \
+  -f hls $OUTPUT_PATH/hls/hls-stream.m3u8
+end=`date +%s`
+echo "Elapsed time for HLS with demuxing: $((end-start))"
 
-mkdir -p $VIDEOS_PATH/hls
-mkdir -p $VIDEOS_PATH/mpeg-dash
-mkdir -p $VIDEOS_PATH/original
+start=`date +%s`
+# MPEG-DASH
+ffmpeg -i $INPUT_FILE \
+  -codec copy \
+  -start_number 0 \
+  -seg_duration 3 \
+  -f dash $OUTPUT_PATH/mpeg-dash/mpeg-dash-stream.mpd
+end=`date +%s`
+echo "Elapsed time for MPEG-DASH without demuxing: $((end-start))"
 
-ffmpeg -i $INPUT_FILE -codec copy -start_number 0 -hls_time 10 -hls_list_size 0 -f hls $VIDEOS_PATH/hls/converted-video.m3u8
-ffmpeg -i $INPUT_FILE -codec copy -start_number 0 -seg_duration 10 -f dash $VIDEOS_PATH/mpeg-dash/converted-video.mpd
-cp $INPUT_FILE $VIDEOS_PATH/original/original-video.mp4
+# HLS with ABR
+ffmpeg -i $INPUT_FILE \
+  -c:a aac \
+  -c:v libx264 \
+  -profile:v high \
+  -level:v 2.0 \
+  -s 256x144 \
+  -start_number 0 \
+  -hls_time 3 \
+  -hls_list_size 0 \
+  -f hls $OUTPUT_PATH/hls-abr/hls-stream-144p.m3u8
+ffmpeg -i $INPUT_FILE \
+  -c:a aac \
+  -c:v libx264 \
+  -profile:v high \
+  -level:v 4.0 \
+  -s 1280x720 \
+  -start_number 0 \
+  -hls_time 3 \
+  -hls_list_size 0 \
+  -f hls $OUTPUT_PATH/hls-abr/hls-stream-720p.m3u8
+touch $OUTPUT_PATH/hls-abr/hls-stream.m3u8
+printf '#EXTM3U\n#EXT-X-STREAM-INF:BANDWIDTH=50000,RESOLUTION=256x144\nhls-stream-144p.m3u8\n#EXT-X-STREAM-INF:BANDWIDTH=2000000,RESOLUTION=1280x720\nhls-stream-720p.m3u8\n' > $OUTPUT_PATH/hls-abr/hls-stream.m3u8
+
+cp $INPUT_FILE $OUTPUT_PATH/original/original-video.mp4
