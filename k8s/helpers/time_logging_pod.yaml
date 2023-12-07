@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: example-time-logging-pod
+spec:
+  containers:
+    - name: example
+      image: busybox
+      command: ["/bin/sh", "-c", "while true; do echo $(date) This message was printed by example-time-logging-pod; sleep 1; done"]  
