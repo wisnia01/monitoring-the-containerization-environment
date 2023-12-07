@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: load-generator
+  namespace: streaming-server
+spec:
+  containers:
+  - name: load-generator
+    image: busybox:1.28
+    command: ["/bin/sh", "-c"]
+    args:
+    - "while sleep 0.01; do wget -q -O- streaming-server-service:8080; done"
+  restartPolicy: Never

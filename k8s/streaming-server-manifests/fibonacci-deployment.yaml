@@ -4,6 +4,7 @@ metadata:
   labels:
     name: fibonacci-deployment
   name: fibonacci-deployment
+  namespace: streaming-server
 spec:
   replicas: 1
   selector:

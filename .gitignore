@@ -1,4 +1,3 @@
-# videos
 tmp/*
-/**/videos/*
-*.mp4
+/**/streams/*
+bigbuckbunny.mp4

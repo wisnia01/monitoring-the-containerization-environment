@@ -54,7 +54,7 @@ ffmpeg -i $INPUT_FILE \
   -c:a aac \
   -c:v libx264 \
   -profile:v high \
-  -level:v 2.0 \
+  -level:v 4.0 \
   -s 256x144 \
   -start_number 0 \
   -hls_time 3 \
