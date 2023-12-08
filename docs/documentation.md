@@ -1,12 +1,37 @@
 # About the project
-
+The goal of this project is to show different conceptions regarding:
+- monitoring Kubernetes applications,
+- streaming (different protocols etc.),
+- horizontal scaling on Kubernetes, especially of streaming applications
+# Setup
+In order to run this project follow these steps:
+1. Download and install [ffmpeg](https://ffmpeg.org).
+2. Prepare or download some .mp4 file. For example here you can download full BigBuckBunny 10 minutes movie from here: http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4
+3. Place the .mp4 file in the *streaming-server/* directory
+4. In the *streaming-server/* directory run: ```./convert.sh -i MY_MOVIE_FILE.mp4```
+5. If you're on windows machine you can either configure WSL or make some (faster) workaround by downloading [GIT](https://git-scm.com/downloads). After downloading it you can either run the script from GIT Bash same as above or add a path to sh.exe file (for example: *C:\Program Files\Git\bin*) to PATH variable and run it from powershell like ```sh .\convert.sh -i MY_MOVIE_FILE.mp4```
+6. After successfuly converting .mp4 file you can run the k8s application by executing: ```./init-k8s.sh``` in the *k8s/* directory. You can then access the application by visiting *http://localhost:30000*.
+7. You can turn the application down by running: ```./clean-k8s.sh``` also in *k8s/* directory.
+7. Optionally, if you'd like to run simple streaming-server Docker container without any Kubernetes you can run: ```./init-pure-docker.sh``` in the *streaming-server/* directory and visit the application on *http://localhost:8080*.
 # Streaming
 
 # Kubernetes
 
-To fully demonstrate horizontal streaming autoscaling possibilities we decided to run our applications on minikube.
+Kubernetes is a powerful open-source platform for automating the deployment, scaling, and management of containerized applications. Born out of the need to efficiently manage container-based workloads at scale, Kubernetes provides a robust framework for orchestrating and coordinating the deployment of applications encapsulated in containers. It allows us to create certain objects with different kinds like `Pods`, `Deployments`, `Services` or `Autoscalers`
 
-Minikube is an open-source tool for running Kubernetes clusters locally on a single machine. It supports cross-platform use and easy installation via popular package managers or direct downloads. Minikube integrates with hypervisors (e.g., VirtualBox, Hyper-V) or can run Kubernetes nodes as containers using Docker.
+`Pods` in Kubernetes are the smallest deployable units, representing one or more containers that share the same network namespace, storage, and IP address. They serve as the basic building blocks for applications, allowing for efficient deployment, scaling, and management within the Kubernetes ecosystem.
+
+`Deployments` in Kubernetes are resources that manage the deployment and scaling of applications. They use replica sets to maintain a specified number of `pod` replicas, supporting rolling updates and rollbacks for seamless application changes. Deployments provide a declarative configuration for easy management of the application's lifecycle, including scaling and updates.
+
+`Services` in Kubernetes provide a stable endpoint to enable communication between pods. Acting as an abstraction layer, services helps with the discovery and load balancing of pods, ensuring seamless communication within a cluster.
+
+`Autoscalers` in Kubernetes automatically adjust the number of pod replicas based on defined metrics or resource utilization. These dynamic scaling capabilities help optimize performance and ensure efficient resource usage within the cluster.
+
+
+
+To fully demonstrate horizontal streaming autoscaling possibilities we decided to run our applications on `minikube`.
+
+`Minikube` is an open-source tool for running Kubernetes clusters locally on a single machine. It supports cross-platform use and easy installation via popular package managers or direct downloads. Minikube integrates with hypervisors (e.g., VirtualBox, Hyper-V) or can run Kubernetes nodes as containers using Docker.
 
 To start a local Kubernetes cluster with one node we run a command:
 ```
