@@ -37,7 +37,7 @@ ffmpeg -i $INPUT_FILE \
   -hls_list_size 0 \
   -f hls $OUTPUT_PATH/hls/hls-stream.m3u8
 end=`date +%s`
-echo "Elapsed time for HLS with demuxing: $((end-start))"
+echo "Elapsed time for HLS with re-encoding: $((end-start))"
 
 start=`date +%s`
 # MPEG-DASH
@@ -47,7 +47,7 @@ ffmpeg -i $INPUT_FILE \
   -seg_duration 3 \
   -f dash $OUTPUT_PATH/mpeg-dash/mpeg-dash-stream.mpd
 end=`date +%s`
-echo "Elapsed time for MPEG-DASH without demuxing: $((end-start))"
+echo "Elapsed time for MPEG-DASH without re-encoding: $((end-start))"
 
 # HLS with ABR
 ffmpeg -i $INPUT_FILE \
