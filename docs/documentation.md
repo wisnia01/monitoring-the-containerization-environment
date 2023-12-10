@@ -14,6 +14,14 @@ In order to run this project follow these steps:
 7. You can turn the application down by running: ```./clean-k8s.sh``` also in *k8s/* directory.
 7. Optionally, if you'd like to run simple streaming-server Docker container without any Kubernetes you can run: ```./init-pure-docker.sh``` in the *streaming-server/* directory and visit the application on *http://localhost:8080*.
 
+To run this app you need to have a prepared Kubernetes cluster. Easiest way to provide it is to run a local one-node cluster called `minikube`. To do that, download minikube and start it with `minikube start`. After that, deploy application by using script 
+```
+scripts/build_images_and_deploy.sh --rebuild-images --deploy-streaming-server
+```
+Give it some time to properly deploy all apps on the cluster and youre ready to go.
+
+To simulate a workload on a web app use ```kubectl apply -f k8s/helpers/web-load-generator.yaml```. After that you will see HPA automatically deploying all replicas across the node.
+
 
 # Streaming - theoretical introduction
 
@@ -442,7 +450,7 @@ To start a local Kubernetes cluster with one node we run a command:
 ```
 minikube start
 ```
-## Infrastructure and horizontal scaling
+## Infrastructure
 
 Main streaming app is created on kubernetes as a Deployment object. Manifest we use to create it is shown below:
 ```
@@ -511,6 +519,19 @@ spec:
 ```
 Current configuration allow us to expose Node IP to the external world that gives us a possibility to reach a streaming app by using web browser. ``sessionAffinity: None`` allows us to demonstate that service is load-balancing the traffic between pods created by Deployment that service is connected to. After refreshing page we will reach to the different pod instances.
 
+Every component is stored on separate `namespace` called `streaming-server` which manifest is as simple as:
+```
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: streaming-server
+  labels:
+    name: streaming-server
+```
+Using this helps greatly to separate app's purpose (like streaming-server, monitoring, metric-server etc.) and manage applications faster and easier.
+
+## Horizontal scaling
+
 To create a Horizontal Pod Autoscaler we are using script with following command:
 ```
 kubectl autoscale deployment streaming-server-deployment --cpu-percent=50 --min=1 --max=10 -n streaming-server
@@ -545,14 +566,3 @@ spec:
   restartPolicy: Never
   ```
 This pod configuration will create a simple container with busybox image that will run a script with infinite loop trying to reach our page. Thanks to the ``service`` we dont need to know actual node IP - all we need to do is use ``streaming-server-service`` and Kubernetes will resolve its IP on its own.
-
-Every component is stored on separate `namespace` called `streaming-server` which manifest is as simple as:
-```
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: streaming-server
-  labels:
-    name: streaming-server
-```
-Using this helps greatly to separate app's purpose (like streaming-server, monitoring, metric-server etc.) and manage applications faster and easier.
