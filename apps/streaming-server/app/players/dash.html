@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<title>DASH Live Streaming</title>
+		<link href="https://vjs.zencdn.net/7.5.5/video-js.css" rel="stylesheet">
+		<script src="https://vjs.zencdn.net/7.5.5/video.js"></script>
+		<link href="../styles.css" rel="stylesheet" type="text/css">
+	</head>
+	<body>
+		<img src="../logo.png" alt="Logo" id="logo">
+		<p><a href="/">Back</a></p>
+		<div class="video-wrapper">
+			<h1>MPEG-DASH Player</h1>
+			<video id="player" class="video-js vjs-default-skin" width="720" controls preload="auto">
+				<source src="../streams/mpeg-dash/mpeg-dash-stream.mpd" type="application/dash+xml" />
+			</video>
+		</div>
+		<script>
+			var player = videojs('#player');
+		</script>
+	</body>
+</html>

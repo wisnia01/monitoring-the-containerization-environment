@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: streaming-server-deployment
+  labels:
+    name: streaming-server-deployment
+  namespace: streaming-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: streaming-server-pod
+  template:
+    metadata:
+      labels:
+        name: streaming-server-pod
+      namespace: streaming-server
+    spec:
+      restartPolicy: Always
+      containers:
+        - name: streaming-server-container
+          image: streaming-server:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8080
+          resources:
+            requests:
+              cpu: "10m"
+            limits:
+              cpu: "50m"
