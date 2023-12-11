@@ -1,8 +1,10 @@
 # About the project
-The goal of this project is to show different conceptions regarding:
-- monitoring Kubernetes applications,
-- VOD streaming,
-- horizontal scaling on Kubernetes, especially of streaming applications
+The goal of this project is to show different conceptions regarding: 
+- VOD streaming with various protocols, especially HTTP-based ones like HLS and MPEG-DASH,
+- advantages of HLS and MPEG-DASH such as Adaptive Bitrate Streaming,
+- creating streams with ffmpeg solution,
+- Kubernetes, including its architecture, our infrastructure and horizontal scaling.
+
 # Setup
 In order to run this project follow these steps:
 * Download and install [ffmpeg](https://ffmpeg.org).
@@ -17,8 +19,7 @@ scripts/build_images_and_deploy.sh --rebuild-images --deploy-streaming-server
 ```
 * Use `minikube service streaming-server-service -n streaming-service` to access an application in a browser. It will automatically redirect you to the browser. If not - copy the printed IP with port and paste it in the browser.
 * To simulate a workload on a web app use ```kubectl apply -f k8s/helpers/web-load-generator.yaml```. After that you will see HPA automatically deploying all replicas across the node.
-* Optionally, if you'd like to run simple streaming-server Docker container without any Kubernetes you can run: ```./init-pure-docker.sh``` in the *streaming-server/* directory and visit the application on *http://localhost:8080*.
-
+* Optionally, if you have Docker installed on your machine and you'd like to run simple streaming-server Docker container without any Kubernetes you can run: ```./init-pure-docker.sh``` in the *streaming-server/* directory and visit the application on *http://localhost:8080*.
 
 
 # Streaming - theoretical introduction
@@ -27,7 +28,8 @@ Before we get into the details of how our streaming application works, let's fir
 
 ## What is streaming?
 
-In simple words streaming is the continuous delivery of multimedia content from a server to a client.
+In simple words streaming, or more specifically, streaming media, is the continuous delivery of multimedia
+content from a server to a client with little or no intermediate storage of the data.
 
 We can distinguish two ways of accessing streaming data: live and on-demand.
 In our project, we will focus on on-demand access, specifically in the form of VOD (Video on Demand). 
@@ -58,7 +60,7 @@ Even though RTMP is not used when communicating between media server and players
 
 ### HLS
 
-HLS, or HTTP Live Streaming, stands as an HTTP-centric streaming protocol introduced by Apple in 2009. Widely adopted, supported by many media players, web browsers, mobile devices, and streaming media servers. According to bitmovin yearly surveys https://bitmovin.com/wp-content/uploads/2022/12/bitmovin-6th-video-developer-report-2022-2023.pdf it's currently most popular streaming format.
+HLS, or HTTP Live Streaming, stands as an HTTP-centric streaming protocol introduced by Apple in 2009. Widely adopted, supported by many media players, web browsers, mobile devices, and streaming media servers. According to [bitmovin yearly surveys](https://bitmovin.com/wp-content/uploads/2022/12/bitmovin-6th-video-developer-report-2022-2023.pdf) it's currently most popular streaming format.
 
 Let's talk a bit about how HLS works. Content, for example some movie, is divided into small chunks, each has a few seconds of video and audio. A manifest file, also knows as playlist file, provides the list of all chunks and some additional data. Manifest and chunks can de either pre-processed (like with movie example) or prepared upon request. First approach is more popular in VOD streaming and second one can be used when we have single live streaming source that can utilize RTMP protocol and then we take this RTMP stream and convert it to HLS stream which can then be delivered directly to the end users (or to their player to be specific).
 
@@ -76,7 +78,7 @@ MPEG-DASH is similar to HLS when it comes to the principle of operation. In MPEG
 
 # Streaming application implementation
 
-In this section, we will get into the practical aspects of our project in to provide a clear understanding of HTTP-based streaming protocols like HLS and MPEG-DASH. We'll compare these protocols with progressive downloading and highlight the significance of Adaptive Bitrate Streaming (ABR).
+In this section, we will get into the practical aspects of our project in order to provide a clear understanding of HTTP-based streaming protocols like HLS and MPEG-DASH. We'll compare these protocols with progressive downloading and highlight the significance of Adaptive Bitrate Streaming (ABR).
 We'll divide this section based on certain components of our streaming application and software, tools, solutions etc. that we used.
 
 ## Streams creation
@@ -278,7 +280,7 @@ It's worth to mention that FFmpeg allows us to improve conversion performance. F
 
 ## Streaming server
 
-We've decided to use NGINX web server as our streaming media server. What may be surprising, according to W3Techs' survey (https://w3techs.com/technologies/overview/web_server) and various other statistics, NGINX the most widely used web server. Many people may think that Apache is the most popular one. 
+We've decided to use NGINX web server as our streaming media server. What may be surprising, according to [W3Techs' survey](https://w3techs.com/technologies/overview/web_server) and various other statistics, NGINX the most widely used web server. Many people may think that Apache is the most popular one. 
 
 NGINX's popularity is associated with its effectiveness in handling high-performance tasks and concurrent connections, scalability, reliability and much more.
 
@@ -308,8 +310,6 @@ http {
 ```
 
 Let's explain this in details:
-
-Explanation:
 
 ``events {}``: This block is usually used for configuring global settings related to events. In this example, it's empty, indicating that there are no specific global event configurations.
 
@@ -369,6 +369,21 @@ For containerization of our streaming application we are using Docker which is t
 
 Docker can automatically construct images by interpreting instructions from a Dockerfile. An image is a read-only template with instructions for creating a Docker container. A Dockerfile is a text document containing all the commands that a user might execute on the command line to compile an image.
 
+Our Dockerfile is very simple and looks like this:
+```
+FROM nginx:1.24.0
+COPY conf/nginx.conf /etc/nginx/nginx.conf
+COPY app/ /usr/local/nginx/html/
+```
+
+Let's explain each line:
+
+`FROM nginx:1.24.0`: FROM specifies base image for our Docker image, in this example it's nginx in version 1.24.0
+
+`COPY conf/nginx.conf /etc/nginx/nginx.conf`: We're copying nginx.conf file from our local conf/ directory to /etc/nginx/ directory in Docker container and saving it also as nginx.conf
+
+`COPY app/ /usr/local/nginx/html/`: We're copying app/ directory content to /usr/local/nginx/html/ directory in Docker container
+
 ## Streaming application in action
 
 In this section, we'll have a visual walkthrough of our application by showing relevant screenshots in order to show in practise key features of the application that were described in details earlier.
@@ -377,7 +392,7 @@ Let's start with our home page.
 
 ![Home page](images/1_home_page.png "Home page")
 
-On the top of the page you can see our logo generated with DALLE 3.
+On the top of the page you can see our logo generated with DALLE 3 AI system.
 
 Under the logo you can see our four players:
 
@@ -419,7 +434,7 @@ As we can see first we download master playlist, which then, based on our bandwi
 
 Now let's turn the throttling down and see if the video quality improves.
 
-![HLS Player with ABR 2](images/5_hls_player_with_abr_2.png "HLS Player with ABR 2")
+![HLS Player with ABR 2](images/6_hls_player_with_abr_2.png "HLS Player with ABR 2")
 
 As we can see, after removing the throttling video quality improved. We can see that we downloaded 720p playlist and started downloading individual 720p chunks, but more importantly the transition between 144p and 720p was smooth. Keep in mind that it may take some time to adapt to the throttling manipulation. 
 
