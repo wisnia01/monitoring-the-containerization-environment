@@ -13,8 +13,40 @@
 		<a href="/players/dash.html">MPEG-DASH Player</a>
 		<a href="/players/hls_abr.html">HLS Player with ABR (recommended)</a>
 	</div>
-	<footer>
-		<h2>Current replica: placeholder</h2>
-	</footer>
+	
+	<h2>Current replica: placeholder</h2>
+
+	<h1>Fibonacci Calculator</h1>
+
+	<label for="numberInput">Enter a number:</label>
+	<input type="number" id="numberInput" min="0" placeholder="Enter a number">
+
+	<button onclick="calculateFibonacci()">Calculate Fibonacci</button>
+
+	<p id="result"></p>
+
+	<script>
+	function calculateFibonacci() {
+		var numberInput = document.getElementById("numberInput");
+		var resultElement = document.getElementById("result");
+
+		var number = parseInt(numberInput.value);
+
+		if (isNaN(number)) {
+			resultElement.innerText = "Please enter a valid number.";
+			return;
+		}
+
+		fetch(`/fibonacci/${number}`)
+			.then(response => response.json())
+			.then(data => {
+				resultElement.innerText = `Result: ${data.result}`;
+			})
+			.catch(error => {
+				resultElement.innerText = "Error occurred while calculating Fibonacci.";
+				console.error(error);
+			});
+	}
+	</script>
 </body>
 </html>

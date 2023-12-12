@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    name: number-verifier-deployment
+  name: number-verifier-deployment
+  namespace: streaming-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: number-verifier-pod
+  template:
+    metadata:
+      labels:
+        name: number-verifier-pod
+    spec:
+      restartPolicy: Always
+      containers:
+        - name: number-verifier-container
+          image: number-verifier
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 420

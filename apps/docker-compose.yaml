@@ -1,0 +1,25 @@
+version: '3.9'
+services:
+  streaming-server-service:
+    build: ./streaming-server/
+    ports: 
+      - 8080:8080
+    depends_on:
+      fibonacci-service:
+        condition: service_started
+  fibonacci-service:
+    build: ./fibonacci/
+    depends_on:
+      number-verifier-service:
+        condition: service_started
+  number-verifier-service:
+    build: ./number-verifier/
+    depends_on:
+      jaeger:
+        condition: service_started
+  jaeger-service:
+    image: jaegertracing/all-in-one:1.52
+    ports:
+      - 16686:16686
+    environment:
+      COLLECTOR_ZIPKIN_HTTP_PORT: 9411

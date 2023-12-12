@@ -15,7 +15,7 @@ In order to run this project follow these steps:
 * To run this app you need to have a prepared Kubernetes cluster. Easiest way to provide it is to run a local one-node cluster called `minikube`. To do that, download minikube and start it with `minikube start`.
 * Deploy application by using script shown below. Give it some time to properly deploy all apps on the cluster and youre ready to go.
 ```
-scripts/build_images_and_deploy.sh --rebuild-images --deploy-streaming-server
+scripts/build_images_and_deploy.sh --rebuild-images --deploy-apps
 ```
 * Use `minikube service streaming-server-service -n streaming-service` to access an application in a browser. It will automatically redirect you to the browser. If not - copy the printed IP with port and paste it in the browser.
 * To simulate a workload on a web app use ```kubectl apply -f k8s/helpers/web-load-generator.yaml```. After that you will see HPA automatically deploying all replicas across the node.
