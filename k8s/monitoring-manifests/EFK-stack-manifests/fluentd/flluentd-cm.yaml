@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fluentd-config
+  namespace: monitoring
+data:
+  fluent.conf: |
+    <source>
+      @type systemd
+      @id input_systemd
+      path /var/log/journal/f1a46cb41c9d45969ef9bdf4a48d9b28
+      tag systemd_logs
+      read_from_head true
+    </source>
+
+    <match **>
+      @type elasticsearch
+      @id output_systemd_es
+      hosts elasticsearch.monitoring.svc.cluster.local:9200
+      logstash_format true
+      logstash_prefix systemd
+      include_tag_key true
+      tag_key @log_name
+      flush_interval 5s
+    </match>
