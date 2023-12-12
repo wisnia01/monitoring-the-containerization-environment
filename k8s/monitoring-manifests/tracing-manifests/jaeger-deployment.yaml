@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    name: jaeger-deployment
+  name: jaeger-deployment
+  namespace: monitoring
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: jaeger-pod
+  template:
+    metadata:
+      labels:
+        name: jaeger-pod
+    spec:
+      restartPolicy: Always
+      containers:
+        - name: jaeger-container
+          image: jaegertracing/all-in-one:1.52
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 4317
+            - containerPort: 16686

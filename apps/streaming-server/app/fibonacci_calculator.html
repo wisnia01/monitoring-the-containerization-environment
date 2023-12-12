@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fibonacci Calculator</title>
+</head>
+<body>
+
+<h1>Fibonacci Calculator</h1>
+
+<label for="numberInput">Enter a number:</label>
+<input type="number" id="numberInput" min="0" placeholder="Enter a number">
+
+<button onclick="calculateFibonacci()">Calculate Fibonacci</button>
+
+<p id="result"></p>
+
+<script>
+function calculateFibonacci() {
+    var numberInput = document.getElementById("numberInput");
+    var resultElement = document.getElementById("result");
+
+    var number = parseInt(numberInput.value);
+
+    if (isNaN(number)) {
+        resultElement.innerText = "Please enter a valid number.";
+        return;
+    }
+
+    // Make a GET request to the Flask endpoint
+    fetch(`/fibonacci/${number}`)
+        .then(response => response.json())
+        .then(data => {
+            resultElement.innerText = `Result: ${data.result}`;
+        })
+        .catch(error => {
+            resultElement.innerText = "Error occurred while calculating Fibonacci.";
+            console.error(error);
+        });
+}
+</script>
+
+</body>
+</html>

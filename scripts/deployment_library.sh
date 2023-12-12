@@ -15,15 +15,23 @@ function deploy_EFK {
     done
 }
 
-function deploy_streaming_server {
+function deploy_Jaeger {
+    for yaml_file in "${REPO_ROOT}/k8s/monitoring-manifests/tracing-manifests"/*.yaml; do
+        kubectl apply -f "$yaml_file"
+    done
+}
+
+function deploy_apps {
     #Create a namespace
     kubectl apply -f "${REPO_ROOT}/k8s/namespaces/streaming-server-ns.yaml"
 
-    #Deploy server and fibonacci
-    STREAMING_SERVER_PATH="${REPO_ROOT}/k8s/streaming-server-manifests"
-    for yaml_file in "${STREAMING_SERVER_PATH}"/*.yaml; do
-        kubectl apply -f "$yaml_file"
+    #Deploy apps
+    for dir in "${REPO_ROOT}/k8s/apps-manifests"/*; do
+        for yaml_file in "$dir"/*.yaml; do
+            kubectl apply -f "$yaml_file"
+        done
     done
+
     #Deploy metric server for HPA
     kubectl apply -f "${REPO_ROOT}/k8s/metric-server-manifests/components.yaml"
 

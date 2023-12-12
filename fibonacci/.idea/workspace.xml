@@ -2,10 +2,12 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="0683ca43-be75-4971-9d1a-ba9549dff3b8" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/Dockerfile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../k8s/scripts/clean-k8s.sh" beforeDir="false" afterPath="$PROJECT_DIR$/../k8s/scripts/clean-k8s.sh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../streaming-server/conf/nginx.conf" beforeDir="false" afterPath="$PROJECT_DIR$/../streaming-server/conf/nginx.conf" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../apps/fibonacci/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/../apps/fibonacci/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../apps/streaming-server/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/../apps/streaming-server/Dockerfile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../apps/streaming-server/app/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/../apps/streaming-server/app/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../apps/streaming-server/conf/nginx.conf" beforeDir="false" afterPath="$PROJECT_DIR$/../apps/streaming-server/conf/nginx.conf" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../apps/streaming-server/init-pure-docker.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../reverse-proxy/opentelemetry_module.conf" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -24,7 +26,7 @@
   <component name="PropertiesComponent">
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../apps/fibonacci" />
   </component>
   <component name="RunManager">
     <configuration name="main" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
