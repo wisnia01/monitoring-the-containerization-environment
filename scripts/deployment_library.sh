@@ -16,6 +16,8 @@ function deploy_EFK {
 }
 
 function deploy_Jaeger {
+    kubectl apply -f "${REPO_ROOT}/k8s/namespaces/monitoring-traces.yaml"
+
     for yaml_file in "${REPO_ROOT}/k8s/monitoring-manifests/tracing-manifests"/*.yaml; do
         kubectl apply -f "$yaml_file"
     done

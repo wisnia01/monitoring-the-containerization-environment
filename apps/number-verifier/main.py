@@ -11,7 +11,7 @@ from time import sleep
 
 app = Flask(__name__)
 tracer_provider = TracerProvider(resource=Resource.create({'service.name': 'number-verification-microservice'}))
-tracer_provider.add_span_processor(BatchSpanProcessor(OTLPSpanExporter(endpoint="http://jaeger-service.monitoring.svc.cluster.local:4317", insecure=True)))
+tracer_provider.add_span_processor(BatchSpanProcessor(OTLPSpanExporter(endpoint="http://jaeger-service.monitoring-traces.svc.cluster.local:4317", insecure=True)))
 trace.set_tracer_provider(tracer_provider)
 FlaskInstrumentor().instrument_app(app)
 RequestsInstrumentor().instrument()

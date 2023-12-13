@@ -4,7 +4,7 @@ metadata:
   labels:
     name: jaeger-deployment
   name: jaeger-deployment
-  namespace: monitoring
+  namespace: monitoring-traces
 spec:
   replicas: 1
   selector:
@@ -19,7 +19,7 @@ spec:
       containers:
         - name: jaeger-container
           image: jaegertracing/all-in-one:1.52
-          imagePullPolicy: Never
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 4317
             - containerPort: 16686
