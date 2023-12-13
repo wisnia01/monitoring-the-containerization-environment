@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: streaming-pod
+  namespace: monitoring
+spec:
+  containers:
+  - name: streaming-container
+    image: alpine
+    command:
+    - "/bin/sh"
+    - "-c"
+    - "while true; do echo 'Streaming to stderr' >&2; sleep 1; done"
