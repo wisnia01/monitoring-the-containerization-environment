@@ -910,6 +910,11 @@ which creates an HPA with following configuration:
   \item The minimum and maximum number of pods can be between 1 and 10.
 \end{itemize}
 
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\textwidth]{images/7_hpa_on_k8s.png}
+  \caption{HPA deployed on a Kubernetes cluster}
+  \end{figure}
 
 To enable the autoscaler getting information about current pod CPU usage
 we need to deploy a \texttt{metrics-server} as well.
@@ -946,11 +951,25 @@ spec:
     args: ["while sleep 0.01; do wget -q -O- streaming-server-service:8080; done"]
   restartPolicy: Never
 \end{verbatim}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\textwidth]{images/8_logs_of_web_load_generator.png}
+  \caption{Logs of the web-load-generator Pod}
+  \end{figure}
+
 This pod configuration will create a simple container with busybox image
 that will run a script with infinite loop trying to reach our page.
 Thanks to the \texttt{service} we dont need to know actual node IP - all
 we need to do is use \texttt{streaming-server-service} and Kubernetes
 will resolve its IP on its own.
+
+Thanks to that action all the Deployment pods with a streaming-server has been created
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\textwidth]{images/9_multiple_deployments.png}
+  \caption{Correctly autoscaled streaming application}
+  \end{figure}
 
 \section*{Bibliography}
 

@@ -49,6 +49,8 @@ Elasticsearch excels at indexing and searching large volumes of data quickly and
 ## Fluentd
 Fluentd is a data collector that is used to be deployed on every node within a cluster to be able to collect logs from applications running on them. He collects all the data and sends it to the Elasticsearch. In our project we use two instances of fluentd. One is created to collect logs from Kubernetes applications specificly and the second one is used to collect logs from the Node. It uses a configuration that ingesting logs from /var/log/journal folder, place where the systemd sends all the logs about running services.
 
+To collect logs from the minikube node it was necessary to change the config of the systemd under a /etc/systemd/journald.conf and point a location where all the logs should be stored. After that, under a /var/log/ directory 'journal' folder has been created and it was possible to catch all the logs by the fluentd.
+
 ## Kibana
 When data are ingested, proceeded and properly tagged they are sent to Kibana, where we can actually discover and analyze all the logs across the apps and nodes. Kibana gives us multiple possibilites to visulize the data and explore it. It uses a KQL (Keyword Query Language) that enables us to construct complex queries and filter data, helping to narrow down and focus on specific information. It is possible to save our filters and use them after to create a dashboards.
 
