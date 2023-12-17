@@ -36,6 +36,88 @@ minikube start
 
 # Metrics
 
+Metrics are statistics about a cluster and its resources such as nodes, deployments and others. They are used to analyze the performance of a containerized environment that runs multiple containers with applications inside. They make it possible to determine the potential cause of application errors and problems with the operation and performance of the cluster or its individual nodes. In order to determine the parameters regarding the performance of this environment, it is necessary to monitor the metrics. For this purpose, there were used kube-state-metrics, Prometheus and Grafana.
+
+## Tools
+
+### kube-state-metrics
+
+Kube-state-metrics (KSM) is a simple service that listens to the Kubernetes API server and generates metrics about the state of the objects. It is focused on the health of the various objects inside, such as deployments, nodes and pods. This tool talks with Kubernetes clusters using client-go. It takes a snapshot of the entire Kuberentes state, uses that in-memory state to generate metrics and then serves them as plaintext on the /metrics endpoint and default port 8080. Kube-state-metrics gets raw data directly from the Kubernetes API and does not apply any modifications to the data it exposes. 
+
+### Prometheus
+
+Prometheus collects and stores metrics received from kube-state-metrics as time series data. Data is identified by metric name and key/value pairs. It is possible to create a query to the database using PromQL. It can be also available via web browser.
+
+### Grafana
+
+Grafana is a tool, which allows preparing data visualizations based on entries received from the time series prometheus database. Metrics associated with the same topic can be grouped in one dashboard. From a wide range of possible chart types, there can be chosen the most appropriate type for a certain metric. Dashboard configuration with metrics visualizations can be converted into JSON file and then imported to another instance of Grafana.
+
+## Measured metrics
+
+Metrics relate to various cluster resources. Therefore, in order to make an accurate analysis of the metrics, it is necessary to distinguish them and divide them into appropriate groups, which are called layers. This makes it possible to track down problems concerning a particular group, such as a specific node, which would be unnoticeable by analyzing only metrics concerning the cluster as a whole.
+
+### Cluster layer
+
+The cluster metrics layer provides general information about the cluster, its nodes, applications running on it and available resources of the entire cluster. The examined metrics are:
+- `kube_node_status_condition` - metric determining nodes availability in the cluster,
+- `kube_deployment_status_replicas_unavailable` and `kube_statefulset_status_replicas_unavailable` - metrics specifying the number of unavailable replicas for deployed deployments and statefulsets,
+- `kube_deployment_spec_replicas` - number of pods running for specific deployments,
+- `kube_node_status_allocatable` - determines resources such as the number of CPU cores, RAM and ephemeral memory for each node. These results are then aggregated to get a view for the resources of the entire cluster.
+
+### Control plane layer
+
+This layer provides information about the cluster's control plane and requests handling time directed to it. The state of the master node is checked through the `kube_node_status_condition` metric, while the requests handling time is presented as a combination of several metrics. The `GET`, `POST` and `PUT` operations for both deployments and statefulsets are distinguished here. An operation that determines the average handling time of requests sent by deployments was implemented using the following PromQL query:
+```
+sum by(verb) (apiserver_request_duration_seconds_sum{resource="deployments", verb!="LIST", verb!="WATCH", verb!="DELETE"}) / sum by(verb) (apiserver_request_duration_seconds_count{resource="deployments", verb!="WATCH", verb!="LIST", verb!="DELETE"})
+```
+For statefulsets, the query looks like this:
+```
+sum by(verb) (apiserver_request_duration_seconds_sum{resource="statefulsets", verb!="LIST", verb!="WATCH", verb!="DELETE"}) / sum by(verb) (apiserver_request_duration_seconds_count{resource="statefulsets", verb!="WATCH", verb!="LIST", verb!="DELETE"})
+```
+
+### Node layer
+
+Node layer contains metrics, which describe individual cluster nodes. They allow obtaining information about the availability and consumption of node resources, delays in operations on them, reads and writes to the disk and network traffic load on a node. The examined metrics are:
+- `kube_node_status_allocatable` - determines resources such as the number of CPU cores, RAM and ephemeral memory for the node,
+- `kubelet_running_containers` - the number of running containers on a given node. It allows determining whether the containers are more or less evenly distributed among the nodes,
+- `node_disk_io_time_seconds_total` - describes the number of I/O operations on the disk, transformed into the expression `rate (node_disk_io_time_seconds_total{instance="$internal_ip:9100"}[1m])`,
+- `kubelet_runtime_operations_duration_seconds_sum` and `kubelet_runtime_operations_duration_seconds_count` - allow calculating the average duration of the tasks: `container_status`, `create_container`, `list_containers`, `remove_container`, `start_container`. For this purpose, the following PromQL query was performed:
+```
+kubelet_runtime_operations_duration_seconds_sum{node="$node", operation_type!="image_status", operation_type!="list_images", operation_type!="list_podsandbox", operation_type!="podsandbox_status", operation_type!="port_forward", operation_type!="pull_image" , operation_type!="remove_podsandbox", operation_type!="run_podsandbox", operation_type!="status", operation_type!="stop_podsandbox", operation_type!="update_runtime_config", operation_type!="version"} / kubelet_runtime_operations_duration_seconds_count{node="$ node", operation_type!="image_status", operation_type!="list_images", operation_type!="list_podsandbox", operation_type!="podsandbox_status", operation_type!="port_forward", operation_type!="pull_image", operation_type!="remove_podsandbox ", operation_type!="run_podsandbox", operation_type!="status", operation_type!="stop_podsandbox", operation_type!="update_runtime_config", operation_type!="version"}
+```
+- `node_disk_reads_completed_total` - node disk read counter, represented as average number of operations over time using the query `rate (node_disk_reads_completed_total{instance="$internal_ip:9100"}[1m])`,
+- `node_disk_writes_completed_total` - writes to the node's disk counter, represented as the average number of operations over time using the query `rate (node_disk_writes_completed_total{instance="$internal_ip:9100"}[1m])`,
+- `node_network_receive_bytes_total` - counter of bytes received for a given node, presented as the average number of bytes received over time using the query `rate (node_network_receive_bytes_total{instance="$internal_ip:9100"}[1m])`,
+- `node_network_transmit_bytes_total` - counter of bytes sent for a given node, presented as the average number of bytes sent over time using the query `rate (node_network_transmit_bytes_total{instance="$internal_ip:9100"}[1m])`,
+- `node_disk_read_bytes_total` - counter of bytes read from the node's disk presented as the average number of bytes read from the disk of a given node using the query `rate(node_disk_read_bytes_total{instance="$internal_ip:9100"}[1m])`,
+- `node_disk_written_bytes_total` - counter of bytes written to the node's disk presented as the average number of bytes written to the disk of a given node using the query `rate(node_disk_written_bytes_total{instance="$internal_ip:9100"}[1m])`
+
+### Pod layer
+
+This layer presents information about the pods running on the cluster, such as lifetime of that pod, resource consumption, requests and limits imposed on the pod. The following metrics are used here:
+- `kube_pod_status_ready` - describes the status of a given pod,
+- `kube_pod_status_container_ready_time` - the running time of the pod calculated using the `time() - kube_pod_status_container_ready_time{pod="$pod"}` expression,
+- `container_cpu_usage_seconds_total` - describes the cumulative measure of CPU usage time since pod startup. This quantity was converted to average CPU core usage over time using the expression `rate(container_cpu_usage_seconds_total{pod="$pod"}[1m])`,
+- `kube_pod_container_resource_requests` - describes the resources requested by pod: RAM and number of CPU cores,
+- `kube_pod_container_resource_limits` - describes the imposed limits on the pod's use of resources: RAM and the node's CPU cores.
+
+
+### Application layer
+
+The lowest layer shows the operation of the application (container) inside the pod, resources it requests and the number of application restarts. The metrics in this layer are:
+- `kube_pod_container_status_running` - specifies the status of the container,
+- `kube_pod_container_status_restarts_total` - counter of container restarts,
+- `kube_pod_container_resource_requests` - specifies the RAM and CPU cores requested by the container.
+
+## Test scenarios
+
+### Checking on cluster resources
+
+To check whether a cluster or any node is running out of resources, such as RAM memory, ephemeral memory or CPU cores there is a need to look into two layers: cluster and node. In cluster node the total available resource of the entire cluster should be inspected. In the node layer, on the other hand, for each node there should be verified the available number of resources. If it turns out that any node begins to run out of resources, appropriate actions should be taken.
+
+### Pod and application resources usage
+
+To see whether the managed and assigned to the corresponding pod resources have gone to the containers running in it there should be checked the sizes of the requested  resources by the pod and then the sizes of the requested resources by all the containers in that pod should be added up.
 
 # Logs
 
@@ -44,7 +126,7 @@ Efficient log collection is paramount for gaining insights into the health, perf
 Each application generates logs that can be collected, aggregated and sent for analyzis and visualization. To achieve that we decided to use well known EFK stack - consisting of Elasticsearch, Fluend and Kibana.
 
 ## Elasticsearch
-Elasticsearch excels at indexing and searching large volumes of data quickly and efficiently. In the context of log management, Elasticsearch acts as the storage and retrieval mechanism for logs. Logs from various sources are ingested into Elasticsearch, where they are indexed and made searchable. Its distributed nature ensures scalability, allowing it to handle vast amounts of log data across a cluster of nodes. Within the Elasticsearch there is a logstash underneath that ingests, processes, and forwards logs and events to various outputs. It serves as the middleware between input sources and Elasticsearch itself.
+Elasticsearch excels at indexing and searching large volumes of data quickly and efficiently. In the context of log management, Elasticsearch acts as the storage and retrieval mechanism for logs. Logs from various sources are ingested into Elasticsearch, where they are indexed and made searchable. Its distributed nature ensures scalability, allowing it to handle vast amounts of log data across a cluster of nodes. Within the Elasticsearch there is a logstash underneath that ingests, processes and forwards logs and events to various outputs. It serves as the middleware between input sources and Elasticsearch itself.
 
 ## Fluentd
 Fluentd is a data collector that is used to be deployed on every node within a cluster to be able to collect logs from applications running on them. He collects all the data and sends it to the Elasticsearch. In our project we use two instances of fluentd. One is created to collect logs from Kubernetes applications specificly and the second one is used to collect logs from the Node. It uses a configuration that ingesting logs from /var/log/journal folder, place where the systemd sends all the logs about running services.
