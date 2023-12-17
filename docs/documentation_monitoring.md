@@ -68,11 +68,13 @@ The cluster metrics layer provides general information about the cluster, its no
 
 This layer provides information about the cluster's control plane and requests handling time directed to it. The state of the master node is checked through the `kube_node_status_condition` metric, while the requests handling time is presented as a combination of several metrics. The `GET`, `POST` and `PUT` operations for both deployments and statefulsets are distinguished here. An operation that determines the average handling time of requests sent by deployments was implemented using the following PromQL query:
 ```
-sum by(verb) (apiserver_request_duration_seconds_sum{resource="deployments", verb!="LIST", verb!="WATCH", verb!="DELETE"}) / sum by(verb) (apiserver_request_duration_seconds_count{resource="deployments", verb!="WATCH", verb!="LIST", verb!="DELETE"})
+sum by(verb) (apiserver_request_duration_seconds_sum{resource="deployments", verb!="LIST", verb!="WATCH", verb!="DELETE"}) /
+sum by(verb) (apiserver_request_duration_seconds_count{resource="deployments", verb!="WATCH", verb!="LIST", verb!="DELETE"})
 ```
 For statefulsets, the query looks like this:
 ```
-sum by(verb) (apiserver_request_duration_seconds_sum{resource="statefulsets", verb!="LIST", verb!="WATCH", verb!="DELETE"}) / sum by(verb) (apiserver_request_duration_seconds_count{resource="statefulsets", verb!="WATCH", verb!="LIST", verb!="DELETE"})
+sum by(verb) (apiserver_request_duration_seconds_sum{resource="statefulsets", verb!="LIST", verb!="WATCH", verb!="DELETE"}) /
+sum by(verb) (apiserver_request_duration_seconds_count{resource="statefulsets", verb!="WATCH", verb!="LIST", verb!="DELETE"})
 ```
 
 ### Node layer
@@ -83,7 +85,13 @@ Node layer contains metrics, which describe individual cluster nodes. They allow
 - `node_disk_io_time_seconds_total` - describes the number of I/O operations on the disk, transformed into the expression `rate (node_disk_io_time_seconds_total{instance="$internal_ip:9100"}[1m])`,
 - `kubelet_runtime_operations_duration_seconds_sum` and `kubelet_runtime_operations_duration_seconds_count` - allow calculating the average duration of the tasks: `container_status`, `create_container`, `list_containers`, `remove_container`, `start_container`. For this purpose, the following PromQL query was performed:
 ```
-kubelet_runtime_operations_duration_seconds_sum{node="$node", operation_type!="image_status", operation_type!="list_images", operation_type!="list_podsandbox", operation_type!="podsandbox_status", operation_type!="port_forward", operation_type!="pull_image" , operation_type!="remove_podsandbox", operation_type!="run_podsandbox", operation_type!="status", operation_type!="stop_podsandbox", operation_type!="update_runtime_config", operation_type!="version"} / kubelet_runtime_operations_duration_seconds_count{node="$ node", operation_type!="image_status", operation_type!="list_images", operation_type!="list_podsandbox", operation_type!="podsandbox_status", operation_type!="port_forward", operation_type!="pull_image", operation_type!="remove_podsandbox ", operation_type!="run_podsandbox", operation_type!="status", operation_type!="stop_podsandbox", operation_type!="update_runtime_config", operation_type!="version"}
+kubelet_runtime_operations_duration_seconds_sum{node="$node", operation_type!="image_status", operation_type!="list_images", operation_type!="list_podsandbox",
+operation_type!="podsandbox_status", operation_type!="port_forward", operation_type!="pull_image" , operation_type!="remove_podsandbox",
+operation_type!="run_podsandbox", operation_type!="status", operation_type!="stop_podsandbox", operation_type!="update_runtime_config", operation_type!="version"}
+/ kubelet_runtime_operations_duration_seconds_count{node="$ node", operation_type!="image_status", operation_type!="list_images",
+operation_type!="list_podsandbox", operation_type!="podsandbox_status", operation_type!="port_forward", operation_type!="pull_image",
+operation_type!="remove_podsandbox ", operation_type!="run_podsandbox", operation_type!="status", operation_type!="stop_podsandbox",
+operation_type!="update_runtime_config", operation_type!="version"}
 ```
 - `node_disk_reads_completed_total` - node disk read counter, represented as average number of operations over time using the query `rate (node_disk_reads_completed_total{instance="$internal_ip:9100"}[1m])`,
 - `node_disk_writes_completed_total` - writes to the node's disk counter, represented as the average number of operations over time using the query `rate (node_disk_writes_completed_total{instance="$internal_ip:9100"}[1m])`,
