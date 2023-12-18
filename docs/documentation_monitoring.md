@@ -2,7 +2,7 @@
 The goal of this project is to show different conceptions regarding: 
 - Monitoring and observability, especially of Kubernetes environments
 - The Four Golden Signals of monitoring and The Three Pillars of observability
-- Metrics - WIKTOR I OLA OPISZCIE
+- Monitoring metrics using kube-state-metrics, Prometheus and Grafana
 - Collecting and agregating logs using EFK stack - Elasticsearch, Fluentd, Kibana. 
 - Instrumenting applications with OpenTelemetry, collecting traces with it and analyzing them in Jaeger
 
