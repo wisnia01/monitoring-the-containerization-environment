@@ -14,7 +14,7 @@
 
 \maketitle
 
-\section{About the project}\label{about-the-project}
+\section{Introduction}
 
 The goal of this project is to show different conceptions and approaches regarding:
 \begin{itemize}
@@ -889,7 +889,7 @@ metadata:
 \end{verbatim}
 
 Using this helps greatly to separate app's purpose (like
-streaming-server, monitoring, metric-server etc.) and manage
+streaming-server, metric-server etc.) and manage
 applications faster and easier.
 
 \subsection{Horizontal scaling}\label{horizontal-scaling}
@@ -952,12 +952,6 @@ spec:
   restartPolicy: Never
 \end{verbatim}
 
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=\textwidth]{images/8_logs_of_web_load_generator.png}
-  \caption{Logs of the web-load-generator Pod}
-  \end{figure}
-
 This pod configuration will create a simple container with busybox image
 that will run a script with infinite loop trying to reach our page.
 Thanks to the \texttt{service} we dont need to know actual node IP - all
@@ -971,6 +965,7 @@ Thanks to that action all the Deployment pods with a streaming-server has been c
   \caption{Correctly autoscaled streaming application}
   \end{figure}
 
+\newpage
 \section*{Bibliography}
 
 \begin{thebibliography}{}
@@ -1038,6 +1033,5 @@ Thanks to that action all the Deployment pods with a streaming-server has been c
 \item \url{https://github.com/kubernetes-sigs/metrics-server}
 
 \end{thebibliography}
-
 
 \end{document}
