@@ -1,11 +1,13 @@
-# About the project
+# Introduction
 The goal of this project is to show different conceptions regarding: 
+- Monitoring and observability, especially of Kubernetes environments
+- The Four Golden Signals of monitoring and The Three Pillars of observability
+- Metrics - WIKTOR I OLA OPISZCIE
 - Collecting and agregating logs using EFK stack - Elasticsearch, Fluentd, Kibana. 
-- .
-- .
+- Instrumenting applications with OpenTelemetry, collecting traces with it and analyzing them in Jaeger
 
 
-# Kubernetes
+# Kubernetes - theoretical introduction
 
 Kubernetes is a powerful open-source platform for automating the deployment, scaling, and management of containerized applications. Born out of the need to efficiently manage container-based workloads at scale, Kubernetes provides a robust framework for orchestrating and coordinating the deployment of applications encapsulated in containers. It allows us to create certain objects with different kinds like `Pods`, `Deployments`, `Services` or `Autoscalers`
 
@@ -28,8 +30,45 @@ To start a local Kubernetes cluster with one node we run a command:
 minikube start
 ```
 
-# Monitoring
+# Monitoring - theoretical introduction
 
+## Why do we need monitoring and observability
+
+Monitoring, including observability, helps analyze and understand systems in real-time. It provides reports and insights for effective management, quick response to issues, and improved performance and reliability. This continuous oversight ensures a proactive approach to addressing problems, making the system more robust and efficient.
+
+## What is monitoring?
+
+Monitoring is the process of collecting, analyzing, and utilizing information about a system. It is often mistakenly thought that monitoring solely focuses on observing metrics, especially the so-called "four golden signals", but it is a much more complex process. Nonetheless, the four golden signals remain important components of monitoring and we will use them in our project. 
+
+### Golden signals
+
+The four golden signals are given:
+
+1. Latency: The time it takes to fulfill a request.
+2. Traffic: An indication of the demand on your system, usually measured as specific to your system's overall activity. For a web service, this is commonly counted as HTTP requests per second.
+3. Errors: The frequency of unsuccessful requests.
+4. Saturation: How occupied your service is. It gauges your system's capacity, highlighting the resources under the most strain (e.g., in a system with limited memory, it reflects memory usage; in a system constrained by I/O, it reflects I/O).
+
+## What is observability?
+
+Observability is the ability to understand the internal state of a system through the analysis of data it generates, such as logs, metrics, and traces. Observability helps analyze what is happening in the environment, allowing for the detection and resolution of encountered issues.
+
+Keep in mind that observability, which is kind of a buzzword, is only an ability and can be included in the monitoring process, not the other way around. It's a common misconception popularized by companies that profit from observability solutions.
+
+### Observability pillars
+
+We can differentiate three main observability categories, often reffered to as the observability pillars:
+
+1. Metrics - in this context, metrics refer to collections of measurements taken over time, and they come in various types:
+- Gauge metrics: These measure a specific value at a particular moment, like the CPU utilization rate at the time of assessment.
+- Delta metrics: These track variances between past and present measurements, indicating changes in metrics like throughput since the last measurement.
+- Cumulative metrics: These record changes over an extended period, such as the cumulative count of errors returned by an API function call over the past hour.
+
+2. Logs - Logs hold system and application details, revealing the inputs and outputs of operations and control flow. They document events like process starts, error handling, or task completions, all with a specific structure including timestamps and description of what happened. It allows logs to offer crucial insights into the system, shedding light on contributing factors and operational impact.
+
+3. Traces - Distributed traces are the third pillar of observability, specifically designed for distributed microservices-based applications. An application may depend on multiple services, each having its own set of metrics and logs. Distributed tracing allows us to "follow" through various services that interact with each other within a request and visualize the dependencies between them.
+
+We will 
 
 # Architecture
 
@@ -149,3 +188,9 @@ When it comes to vizualisation Kibana provides a wide range of visualization opt
 Users can aggregate multiple visualizations into cohesive dashboards. Dashboards in Kibana enable the comprehensive display of relevant information in a single view, facilitating the monitoring and analysis of complex data sets.
 
 # Traces
+
+
+
+# Bibliography
+https://sre.google/sre-book/monitoring-distributed-systems/
+https://www.dynatrace.com/news/blog/observability-vs-monitoring/
