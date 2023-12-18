@@ -72,6 +72,38 @@ We will
 
 # Architecture
 
+To implement mentioned in the previous section observability pillars, a number of applications were deployed on the kubernetes cluster. The architecture of this solution is shown in the diagram below.
+
+![Architecture](images/architecture.png "Architecture")
+
+All resources are divided into 4 different namespaces. Namespaces components and functions are described below.
+
+## streaming-server
+In this namespace there are 3 deployments with their corresponding services:
+- **streaming server** - contains a video streaming application. The application also contains a field for typing and calculating the fibonacci number. It sends the number to the fibonacci deployment through its service and receives the result from this service.
+- **fibonacci** - receives the number to be calculated from the streaming server and sends it to the number verifier via its service and, depending on the response, calculates the given Fibonacci sequence number or returns information to the streaming server that it can’t make calculations,
+- **number verifier** - checks the number sent by fibonacci and sends it back to him via his service.
+
+## monitoring-traces
+
+There is only one deployment named Jaeger with its service that provides 2 ports. The first port is used to communicate with applications from which traces are collected and the second port is used for user interactions.
+
+## monitoring-logs
+
+In this namespace there are below resources:
+- **config map** - contains the configuration, which is read by the fluentd instance of systemd logs,
+deamonset fluentd systemd logs - contains the fluentd application that reads the configuration from the config map and is used to read logs from the cluster node and then sends them to statefulset Elasticsearch via its service,
+- **fluentd k8s logs** - is a deamonset that collects logs from the kubernetes cluster and sends them to statefulset Elasticsearch via its service,
+- **Elasticsearch** - statefulset, which receives data from both fluentd instances, saves it and sends it to deployment Kibana via its service,
+- **Kibana** - deployment that receives data from Elasticsearch and visualizes it.
+
+## monitoring-metrics
+
+This namespace contains the following components:
+- **kube-state-metrics** - deployment, which collects metrics from the entire kubernetes cluster and makes them available in one place. It sends them to statefulset Prometheus via its service.
+- **Prometheus** - statefulset, which receives metrics from kube-state-metrics and saves them in  the Time Series Database. The data available to the Prometheus operator and Grafana is sent through their services.
+- **Prometheus operator** - deployment that is used to operate Prometheus by the user and can influence the configuration of Prometheus. It can also read the stored data.
+- **Grafana** - deployment, which receives data from Prometheus and visualizes it in the form of dashboards. Its service provides a port for the user to operate Grafana.
 
 # Metrics
 
