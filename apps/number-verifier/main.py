@@ -21,7 +21,7 @@ RequestsInstrumentor().instrument()
 def verify(number):
     with trace.get_tracer(__name__).start_as_current_span("number-verification"):
         sleep(0.01)
-        if number <= 20:
+        if number >= 0 and number <= 20:
             return jsonify({'verification': 'success'})
         return jsonify({'verification': 'failed'})
 
