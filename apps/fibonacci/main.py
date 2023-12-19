@@ -34,7 +34,7 @@ def fibonacci(number):
             result = calculate_fibonacci(number)
             return jsonify({'result': result})
         else:
-            return jsonify({'result': 'Please provide a number from 1 to 20'})
+            return jsonify({'result': 'Please provide a number from 0 to 20'})
         
 
 

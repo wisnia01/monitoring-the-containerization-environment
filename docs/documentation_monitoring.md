@@ -82,7 +82,7 @@ All resources are divided into 4 different namespaces. Namespaces components and
 In this namespace there are 3 deployments with their corresponding services:
 - **streaming server** - contains a video streaming application. The application also contains a field for typing and calculating the fibonacci number. It sends the number to the fibonacci deployment through its service and receives the result from this service.
 - **fibonacci** - receives the number to be calculated from the streaming server and sends it to the number verifier via its service and, depending on the response, calculates the given Fibonacci sequence number or returns information to the streaming server that it can’t make calculations. This application was introduced to show how recursive application affect monitoring, especially traces.
-- **number verifier** - checks if the number sent by fibonacci is in range between 1 and 20 (if it's more than 20 then) and sends the result to the fibonacci service. The application was introduced only to have slightly more complex traces.
+- **number verifier** - checks if the number sent by fibonacci is in range between 0 and 20 (if it's more than 20 then) and sends the result to the fibonacci service. The application was introduced only to have slightly more complex traces.
 
 ## monitoring-traces
 
@@ -233,7 +233,7 @@ Before we analyze our use of OpenTelemetry, let's take a look at some key concep
 - `Signals`: OpenTelemetry collects, processes, and exports signals — system outputs describing the underlying activity of the operating system and applications. Examples of signals: metrics, logs, traces.
 - `Instrumentation`: To make a system observable, its components must emit traces, metrics, and logs. This can be achieved through either manual coding against OpenTelemetry APIs or automatic instrumentation, which collects telemetry without bigger modifications of the source code.
 - `Collector`: A proxy that receives, processes, and exports telemetry data. It supports various telemetry formats (e.g., OTLP, Jaeger, Prometheus) and can send data to multiple backends. The collector also facilitates processing and filtering telemetry data before export. We will use collector that is included in Jaeger all-in-one solution.
-- `Traces`: Traces are examples of signals. They provide a holistic view of events during a request in an application, crucial for understanding its journey.
+- `Traces`: Traces serve as examples of signals. They provide a holistic view of events during a request in an application, crucial for understanding its journey.
 - `Tracer Provider`: Acts as a factory for Tracers, initialized once, aligning with the application's lifecycle.
 - `Tracer`: Generates spans, offering details on specific operations like a request within a service.
 - `Trace Exporters`: Dispatch traces to consumers, including debugging outputs, OpenTelemetry Collector, or preferred backends.
@@ -245,7 +245,7 @@ Before we analyze our use of OpenTelemetry, let's take a look at some key concep
 - `Span Status`: Indicates if there's a known error in the application code.
 - `Span Kind`: Categorizes spans into Client, Server, Internal, Producer, or Consumer, guiding how the trace is assembled.
 
-More information about OpenTelemetry concepts and be found in the [documentation](https://opentelemetry.io/docs/).
+More information about OpenTelemetry concepts can be found in the [documentation](https://opentelemetry.io/docs/).
 
 ### Our OpenTelemetry usage
 
@@ -254,7 +254,7 @@ We have used OpenTelemetry to extract traces from our three applications:
 - fibonacci application written in python with Flask framework,
 - number verifier application written in python with Flask framework.
 
-For nginx we have used ngx_http_opentelemetry_module.so module. The process of applying it can be found in OpenTelemetry documentation: [link](https://opentelemetry.io/blog/2022/instrument-nginx/). Here's our nginx.conf content:
+For nginx we have used ngx_http_opentelemetry_module.so module. Instructions for applying it can be found in the OpenTelemetry documentation: [link](https://opentelemetry.io/blog/2022/instrument-nginx/). Here's our nginx.conf content:
 
 ```
 load_module /opt/opentelemetry-webserver-sdk/WebServerModule/Nginx/1.23.1/ngx_http_opentelemetry_module.so;
@@ -320,7 +320,7 @@ This code instruments the Flask application and the Requests library for OpenTel
 @app.route('/fibonacci/<int:number>', methods=['GET'])
 def fibonacci(number):
     with trace.get_tracer(__name__).start_as_current_span("fibonacci-calculation"):
-        # rest of the code
+        # Rest of the code: Perform Fibonacci calculation based on the provided number.
 ```
 Here we can see an example of how to start a span.
 
@@ -344,22 +344,27 @@ We've used Jaeger all-in-one for our purposes. It's an executable designed for q
 
 ## Traces demonstration
 
-Finally, let's see how our traces look like.
-First, let's have a look at our main page in order to describe exemplary user request:
+To illustrate our traces in action, let's begin by examining the main page:
 
-As you can see there is a fibonacci form in which you can enter some number, let's say N in order to get N-th fibonacci number. After submitting this form the number you've provided will be sent to the fibonacci microservice, which then will forward this number to the number verification microservice in order to check if the number is within the desired interval (from 1 to 20). It will return appropriate result to the fibonacci microservice and if the result is valid then the fibonacci app will perform appropriate calculation using a recursive approach. Finally the result will be returned to the streaming server and will be visible to the user as below:
+![Main page](images/10_main_page.png "Main page")
+
+As you can see there is a fibonacci form in which you can enter some number, let's say N in order to get N-th fibonacci number. After submitting this form the number you've provided will be sent to the fibonacci microservice, which then will forward this number to the number verification microservice in order to check if the number is within the desired interval (from 0 to 20). It will return appropriate result to the fibonacci microservice and if the result is valid then the fibonacci app will perform appropriate calculation using a recursive approach. Finally the result will be returned to the streaming server and will be visible to the user as below:
+
+![Fibonacci result](images/11_fibonacci_result.png "Fibonacci result")
 
 Now let's explore what we have in Jaeger:
 
-As we can see in the visualization of the request that we've just described, there is a trace consisted of multiple spans and spans from each application have different colors. We can clearly see the correlation between them, including recursive calls in the fibonacci microservice, along with some additional informations like span attributes.
+![Traces visualization in Jaeger](images/12_jaeger_traces.png "Traces visualization in Jaeger")
 
-Now, thanks to traces, we can have a deeper understanding of our distributed systems, look for potential bottlenecks and improvements, investigate problems in our system and analyze dependencies between services, everything in visually-appealing way.
+As we can see in the visualization of the request that we've just described, there is a trace consisted of multiple spans and spans from each application have different colors. We can clearly see the correlation between them, including control flow between nginx modules, recursive calls in the fibonacci microservice, along with some additional informations like span attributes.
+
+Thanks to traces, we can have a deeper understanding of our distributed systems, look for potential bottlenecks and improvements, investigate problems in our system and analyze dependencies between services, everything in visually-appealing way.
 
 # Bibliography
-https://sre.google/sre-book/monitoring-distributed-systems/
-https://www.dynatrace.com/news/blog/observability-vs-monitoring/
+- https://sre.google/sre-book/monitoring-distributed-systems/
+- https://www.dynatrace.com/news/blog/observability-vs-monitoring/
 
-https://opentelemetry.io/docs/what-is-opentelemetry/
-https://www.jaegertracing.io/docs/1.52/
-https://opentelemetry.io/docs/instrumentation/python/
-https://opentelemetry.io/blog/2022/instrument-nginx/
+- https://opentelemetry.io/docs/what-is-opentelemetry/
+- https://www.jaegertracing.io/docs/1.52/
+- https://opentelemetry.io/docs/instrumentation/python/
+- https://opentelemetry.io/blog/2022/instrument-nginx/
