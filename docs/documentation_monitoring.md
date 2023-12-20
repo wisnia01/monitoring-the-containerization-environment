@@ -135,6 +135,8 @@ The cluster metrics layer provides general information about the cluster, its no
 - `kube_deployment_spec_replicas` - number of pods running for specific deployments,
 - `kube_node_status_allocatable` - determines resources such as the number of CPU cores, RAM and ephemeral memory for each node. These results are then aggregated to get a view for the resources of the entire cluster.
 
+![Cluster layer metrics](images/cluster_layer.png "Cluster layer metrics")
+
 ### Control plane layer
 
 This layer provides information about the cluster's control plane and requests handling time directed to it. The state of the master node is checked through the `kube_node_status_condition` metric, while the requests handling time is presented as a combination of several metrics. The `GET`, `POST` and `PUT` operations for both deployments and statefulsets are distinguished here. An operation that determines the average handling time of requests sent by deployments was implemented using the following PromQL query:
@@ -147,6 +149,7 @@ For statefulsets, the query looks like this:
 sum by(verb) (apiserver_request_duration_seconds_sum{resource="statefulsets", verb!="LIST", verb!="WATCH", verb!="DELETE"}) /
 sum by(verb) (apiserver_request_duration_seconds_count{resource="statefulsets", verb!="WATCH", verb!="LIST", verb!="DELETE"})
 ```
+![Control plane layer](images/control_plane.png "Control plane layer")
 
 ### Node layer
 
@@ -171,6 +174,10 @@ operation_type!="update_runtime_config", operation_type!="version"}
 - `node_disk_read_bytes_total` - counter of bytes read from the node's disk presented as the average number of bytes read from the disk of a given node using the query `rate(node_disk_read_bytes_total{instance="$internal_ip:9100"}[1m])`,
 - `node_disk_written_bytes_total` - counter of bytes written to the node's disk presented as the average number of bytes written to the disk of a given node using the query `rate(node_disk_written_bytes_total{instance="$internal_ip:9100"}[1m])`
 
+![Node layer](images/node_layer_1.png "Node layer")
+
+![Node layer](images/node_layer_2.png "Node layer")
+
 ### Pod layer
 
 This layer presents information about the pods running on the cluster, such as lifetime of that pod, resource consumption, requests and limits imposed on the pod. The following metrics are used here:
@@ -180,6 +187,7 @@ This layer presents information about the pods running on the cluster, such as l
 - `kube_pod_container_resource_requests` - describes the resources requested by pod: RAM and number of CPU cores,
 - `kube_pod_container_resource_limits` - describes the imposed limits on the pod's use of resources: RAM and the node's CPU cores.
 
+![Pod layer](images/pod_layer.png "Pod layer")
 
 ### Application layer
 
@@ -187,6 +195,8 @@ The lowest layer shows the operation of the application (container) inside the p
 - `kube_pod_container_status_running` - specifies the status of the container,
 - `kube_pod_container_status_restarts_total` - counter of container restarts,
 - `kube_pod_container_resource_requests` - specifies the RAM and CPU cores requested by the container.
+
+![Application layer](images/aplication_layer.png "Application layer")
 
 ## Test scenarios
 
