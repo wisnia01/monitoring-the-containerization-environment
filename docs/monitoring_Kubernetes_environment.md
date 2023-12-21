@@ -6,6 +6,20 @@ The goal of this project is to show different conceptions regarding:
 - Collecting and agregating logs using EFK stack - Elasticsearch, Fluentd, Kibana. 
 - Instrumenting applications with OpenTelemetry, collecting traces with it and analyzing them in Jaeger
 
+# Setup
+In order to run this project follow these steps:
+* Download and install [ffmpeg](https://ffmpeg.org) and [helm](https://helm.sh/docs/intro/install/).
+* If you'd like to stream your custom video prepare or download appropriate .mp4 file. For example here you can download full BigBuckBunny 10 minutes movie from here: http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4, if not then you can use Sintel Trailer (sinteltrailer.mp4 file) that is provided by default.
+* Place the .mp4 file in the *apps/streaming-server/* directory
+* In the *apps/streaming-server/* directory run: ```./convert.sh -i MY_MOVIE_FILE.mp4```
+* If you're on windows machine you can either configure WSL or make some (faster) workaround by downloading [GIT](https://git-scm.com/downloads). After downloading it you can either run the script from GIT Bash same as above or add a path to sh.exe file (for example: *C:\Program Files\Git\bin*) to PATH variable and run it from powershell like ```sh .\convert.sh -i MY_MOVIE_FILE.mp4```
+* To run this app you need to have a prepared Kubernetes cluster. Easiest way to provide it is to run a local one-node cluster called `minikube`. To do that, download minikube and start it with `minikube start`.
+* Deploy application by using script shown below. Give it some time to properly deploy all apps on the cluster and you're ready to go.
+```
+scripts/build_images_and_deploy.sh --rebuild-images --deploy-streaming-server --deploy-metrics --deploy-efk
+```
+* Use `minikube service streaming-server-service -n streaming-server` to access an application in a browser. It will automatically redirect you to the browser. If not - copy the printed IP with port and paste it in the browser. Do it analogically for jaeger service in order to reach Jaeger UI `minikube service jaeger-service -n monitoring-logs`. For Grafana UI simply visit http://localhost:2138.
+* To simulate a workload on a streaming server web app use ```kubectl apply -f k8s/helpers/web-load-generator.yaml```. After that you will see HPA automatically deploying all replicas across the node.
 
 # Kubernetes - theoretical introduction
 
@@ -375,7 +389,13 @@ Thanks to traces, we can have a deeper understanding of our distributed systems,
 # Bibliography
 - https://sre.google/sre-book/monitoring-distributed-systems/
 - https://www.dynatrace.com/news/blog/observability-vs-monitoring/
-
+- https://prometheus.io/docs/
+- https://grafana.com/docs/grafana/latest/
+- https://github.com/kubernetes/kube-state-metrics
+- https://grafana.com/blog/2023/01/25/monitoring-kubernetes-layers-key-metrics-to-know/
+- https://www.elastic.co/guide/en/kibana/current/index.html
+- https://docs.fluentd.org
+- https://www.elastic.co/guide/en/elasticsearch/reference/current/index.html
 - https://opentelemetry.io/docs/what-is-opentelemetry/
 - https://www.jaegertracing.io/docs/1.52/
 - https://opentelemetry.io/docs/instrumentation/python/

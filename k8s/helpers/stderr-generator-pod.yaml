@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Pod
 metadata:
   name: streaming-pod
-  namespace: monitoring
+  namespace: monitoring-logs
 spec:
   containers:
   - name: streaming-container

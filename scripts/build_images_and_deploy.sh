@@ -27,6 +27,9 @@ for arg in "$@"; do
     --deploy-efk)
         DEPLOY_EFK=true
         ;;
+    --deploy-metrics)
+        DEPLOY_METRICS=true
+        ;;
     --deploy-streaming-server)
         DEPLOY_STREAMING_SERVER=true
         ;;
@@ -60,4 +63,7 @@ if [ "$DEPLOY_STREAMING_SERVER" = true ]; then
 fi
 if [ "$DEPLOY_EFK" = true ]; then
     deploy_EFK
+fi
+if [ "$DEPLOY_METRICS" = true ]; then
+    deploy_metrics
 fi

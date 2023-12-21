@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: fluentd-config
-  namespace: monitoring
+  namespace: monitoring-logs
 data:
   fluent.conf: |
     <source>
@@ -16,7 +16,7 @@ data:
     <match **>
       @type elasticsearch
       @id output_systemd_es
-      hosts elasticsearch.monitoring.svc.cluster.local:9200
+      hosts elasticsearch.monitoring-logs.svc.cluster.local:9200
       logstash_format true
       logstash_prefix systemd
       include_tag_key true
